@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0"><i class="fas fa-envelope me-2"></i>Contact Us</h2>
+                </div>
+                <div class="card-body">
+                    <p class="lead">We'd love to hear from you! Please use the form below to send us a message.</p>
+                    
+                    <form method="post" class="mt-4">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Your Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="subject" name="subject" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4><i class="fas fa-map-marker-alt me-2"></i>Our Location</h4>
+                            <p>
+                                123 Education Street<br>
+                                Knowledge City, KC 12345<br>
+                                United States
+                            </p>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h4><i class="fas fa-phone me-2"></i>Contact Information</h4>
+                            <p>
+                                <strong>Email:</strong> info@studentattendance.com<br>
+                                <strong>Phone:</strong> +1 (555) 123-4567<br>
+                                <strong>Support Hours:</strong> Monday-Friday, 9am-5pm EST
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

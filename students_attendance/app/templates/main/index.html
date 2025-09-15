@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="jumbotron text-center">
+    <h1 class="display-4">Welcome to Student Attendance System</h1>
+    <p class="lead">A modern solution for tracking and managing student attendance using QR codes</p>
+    <hr class="my-4">
+    <p>Simplify attendance tracking, eliminate proxy attendance, and gain valuable insights with our digital attendance system.</p>
+    
+    {% if not current_user.is_authenticated %}
+        <div class="mt-4">
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg mr-2">Login</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-secondary btn-lg">Register</a>
+        </div>
+    {% else %}
+        <div class="mt-4">
+            {% if current_user.is_admin() %}
+                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary btn-lg">Go to Admin Dashboard</a>
+            {% elif current_user.is_faculty() %}
+                <a href="{{ url_for('faculty.dashboard') }}" class="btn btn-primary btn-lg">Go to Faculty Dashboard</a>
+            {% elif current_user.is_student() %}
+                <a href="{{ url_for('student.dashboard') }}" class="btn btn-primary btn-lg">Go to Student Dashboard</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <i class="fas fa-qrcode fa-4x mb-3 text-primary"></i>
+                <h5 class="card-title">QR Code Attendance</h5>
+                <p class="card-text">Generate unique QR codes for each class session. Students scan to mark their attendance quickly and securely.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-bar fa-4x mb-3 text-primary"></i>
+                <h5 class="card-title">Attendance Analytics</h5>
+                <p class="card-text">Access comprehensive attendance reports and identify patterns to improve student engagement.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <i class="fas fa-cloud fa-4x mb-3 text-primary"></i>
+                <h5 class="card-title">Cloud-Based Dashboard</h5>
+                <p class="card-text">Access attendance records anytime, anywhere. Works seamlessly for both in-person and online classes.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

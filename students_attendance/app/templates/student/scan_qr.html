@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-qrcode me-2"></i>Scan QR Code</h4>
+            </div>
+            <div class="card-body text-center">
+                <p class="mb-4">Use your device's camera to scan the QR code displayed by your instructor to mark your attendance.</p>
+                
+                <div id="qr-reader" style="width: 100%; max-width: 500px; margin: 0 auto;"></div>
+                
+                <div id="qr-reader-results" class="mt-3">
+                    <div id="attendance-status" class="alert alert-info" style="display: none;">
+                        Waiting for QR code scan...
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <p>Can't scan? <a href="{{ url_for('student.mark_attendance') }}">Enter session code manually</a></p>
+                </div>
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('student.dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_js %}
+<script src="https://unpkg.com/html5-qrcode@2.2.1/html5-qrcode.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const html5QrCode = new Html5Qrcode("qr-reader");
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        const statusDiv = document.getElementById('attendance-status');
+        
+        // Success callback
+        const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+            // Stop scanning
+            html5QrCode.stop();
+            
+            // Show processing message
+            statusDiv.className = 'alert alert-info';
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing attendance...';
+            
+            // Call the API to mark attendance
+            fetch('/student/api/mark_attendance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    session_code: decodedText
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    statusDiv.className = 'alert alert-success';
+                    statusDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>' + data.message;
+                    
+                    // Redirect to course details page after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = `/student/course/${data.course.id}`;
+                    }, 2000);
+                } else {
+                    // Show error message
+                    statusDiv.className = 'alert alert-danger';
+                    statusDiv.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>' + data.message;
+                    
+                    // Allow scanning again after 3 seconds
+                    setTimeout(() => {
+                        html5QrCode.start(
+                            { facingMode: "environment" }, 
+                            config,
+                            qrCodeSuccessCallback,
+                            qrCodeErrorCallback
+                        );
+                    }, 3000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                statusDiv.className = 'alert alert-danger';
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>Error processing attendance. Please try again.';
+                
+                // Allow scanning again after 3 seconds
+                setTimeout(() => {
+                    html5QrCode.start(
+                        { facingMode: "environment" }, 
+                        config,
+                        qrCodeSuccessCallback,
+                        qrCodeErrorCallback
+                    );
+                }, 3000);
+            });
+        };
+        
+        // Error callback
+        const qrCodeErrorCallback = (errorMessage) => {
+            // We don't need to do anything here
+        };
+        
+        // Start scanning
+        html5QrCode.start(
+            { facingMode: "environment" }, 
+            config,
+            qrCodeSuccessCallback,
+            qrCodeErrorCallback
+        ).catch(err => {
+            statusDiv.className = 'alert alert-danger';
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>Unable to start camera. Please ensure you have given camera permissions.';
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Student Dashboard</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card mb-3">
+                            <div class="card-body text-center">
+                                <img src="{{ url_for('static', filename='images/profile_pics/' ~ current_user.profile_image) if current_user.profile_image else 'https://via.placeholder.com/150' }}" 
+                                     alt="Profile Picture" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                                <h5>{{ current_user.first_name }} {{ current_user.last_name }}</h5>
+                                <p class="text-muted">{{ student.roll_number }}</p>
+                                <p><strong>Department:</strong> {{ student.department }}</p>
+                                <p><strong>Semester:</strong> {{ student.semester }}</p>
+                                <p><strong>Section:</strong> {{ student.section or 'N/A' }}</p>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('student.mark_attendance') }}" class="btn btn-primary">
+                                <i class="fas fa-qrcode me-2"></i>Mark Attendance
+                            </a>
+                            <a href="{{ url_for('student.scan_qr') }}" class="btn btn-success">
+                                <i class="fas fa-camera me-2"></i>Scan QR Code
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-9">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Attendance Overview</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="overall-attendance mb-4">
+                                    <h6>Overall Attendance: {{ overall_percentage|round(1) }}%</h6>
+                                    <div class="progress" style="height: 25px;">
+                                        {% set progress_class = 'bg-danger' if overall_percentage < 75 else ('bg-warning' if overall_percentage < 85 else 'bg-success') %}
+                                        <div class="progress-bar {{ progress_class }}" role="progressbar" style="width: {{ overall_percentage }}%;" 
+                                             aria-valuenow="{{ overall_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                            {{ overall_percentage|round(1) }}%
+                                        </div>
+                                    </div>
+                                    {% if overall_percentage < 75 %}
+                                        <div class="alert alert-danger mt-2">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>Your overall attendance is below 75%. Please improve your attendance.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <h6>Course-wise Attendance</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Course Code</th>
+                                                <th>Course Name</th>
+                                                <th>Attendance</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in course_attendance %}
+                                            <tr>
+                                                <td>{{ item.course.course_code }}</td>
+                                                <td>{{ item.course.title }}</td>
+                                                <td>
+                                                    {% set percentage = item.attendance_percentage %}
+                                                    <div class="progress">
+                                                        {% set progress_class = 'bg-danger' if percentage < 75 else ('bg-warning' if percentage < 85 else 'bg-success') %}
+                                                        <div class="progress-bar {{ progress_class }}" role="progressbar" style="width: {{ percentage }}%;" 
+                                                             aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                                            {{ percentage|round(1) }}%
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    {% if percentage < 75 %}
+                                                        <span class="badge bg-danger">Critical</span>
+                                                    {% elif percentage < 85 %}
+                                                        <span class="badge bg-warning">Warning</span>
+                                                    {% else %}
+                                                        <span class="badge bg-success">Good</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <a href="{{ url_for('student.course_details', course_id=item.course.id) }}" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-eye"></i> Details
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Recent Attendance</h5>
+                            </div>
+                            <div class="card-body">
+                                {% if recent_attendance %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Course</th>
+                                                    <th>Status</th>
+                                                    <th>Time</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for attendance in recent_attendance %}
+                                                <tr>
+                                                    <td>{{ attendance.session.date.strftime('%Y-%m-%d') }}</td>
+                                                    <td>{{ attendance.session.course.course_code }} - {{ attendance.session.course.title }}</td>
+                                                    <td>
+                                                        {% if attendance.status == 'present' %}
+                                                            <span class="badge bg-success">Present</span>
+                                                        {% elif attendance.status == 'late' %}
+                                                            <span class="badge bg-warning">Late</span>
+                                                        {% else %}
+                                                            <span class="badge bg-danger">Absent</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ attendance.timestamp.strftime('%H:%M:%S') }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% else %}
+                                    <p class="text-center">No recent attendance records.</p>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url_for('student.attendance') }}" class="btn btn-primary btn-sm">View All Attendance</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

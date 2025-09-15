@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+<style>
+    .qr-container {
+        text-align: center;
+        margin: 30px 0;
+    }
+    
+    .attendance-form {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .attendance-instructions {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    
+    .btn-scan {
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0"><i class="fas fa-qrcode me-2"></i>Mark Attendance</h2>
+                </div>
+                <div class="card-body">
+                    <div class="attendance-instructions">
+                        <h4><i class="fas fa-info-circle me-2"></i>Instructions</h4>
+                        <ol>
+                            <li>Scan the QR code provided by your instructor</li>
+                            <li>Confirm your attendance details</li>
+                            <li>Submit the form to record your attendance</li>
+                        </ol>
+                        <p class="text-muted">Note: Your device information and location will be recorded for verification purposes.</p>
+                    </div>
+                    
+                    <div class="attendance-form">
+                        <form method="post">
+                            <!-- CSRF token will be added by the server -->
+                            
+                            <div class="form-group mb-3">
+                                <label for="session_code">Session Code (from QR code)</label>
+                                <input type="text" class="form-control" id="session_code" name="session_code" required>
+                                <small class="form-text text-muted">Enter the code from the QR code or scan it directly.</small>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary">Mark My Attendance</button>
+                                <a href="{{ url_for('student.scan_qr') }}" class="btn btn-outline-secondary btn-scan">
+                                    <i class="fas fa-camera me-1"></i>Scan QR Code
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
